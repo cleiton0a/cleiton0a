@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leitor de QR Code</title>
+    <script src="https://cdn.rawgit.com/serratus/quaggaJS/master/dist/quagga.min.js"></script>
+</head>
+<body>
+
+<h1>Leitor de QR Code</h1>
+
+<div id="interactive" class="viewport"></div>
+<div id="result"></div>
+
+<script>
+    // Solicita acesso à câmera do dispositivo
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+        .then(function (stream) {
+            // Configurações do QuaggaJS
+            const config = {
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector("#interactive"),
+                    constraints: {
+                        width: 480,
+                        height: 320,
+                        facingMode: "environment", // Pode ser "user" para câmera frontal
+                        stream: stream,
+                    },
+                },
+                decoder: {
+                    readers: ["qrcode_reader"],
+                },
+            };
+
+            // Inicializa o QuaggaJS
+            Quagga.init(config, function (err) {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                Quagga.start();
+            });
+
+            // Adiciona um ouvinte para capturar o resultado do leitor
+            Quagga.onDetected(function (result) {
+                const code = result.codeResult.code;
+                document.querySelector("#result").innerHTML = `Código QR detectado: ${code}`;
+            });
+        })
+        .catch(function (err) {
+            console.error(err);
+        });
+</script>
+
+</body>
+</html>
